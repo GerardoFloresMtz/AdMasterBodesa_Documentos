@@ -494,6 +494,63 @@ CREATE UNIQUE INDEX PK_UsuariosZonas ON UsuariosZonas (UsuariosId, ZonasId);
 
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
+ALTER TABLE Eventos 
+	ADD esEmergente BIT DEFAULT 0
+
+ALTER TABLE FormatosCargaExcel 
+	ADD ClaveFormatoEmergente VARCHAR(30)
+
+UPDATE FormatosCargaExcel SET
+ClaveFormatoEmergente = 'LM-BOD-FOR-A-001-V6' 
+WHERE FormatosId = 1
+
+UPDATE FormatosCargaExcel SET
+ClaveFormatoEmergente = 'LM-BOD-FOR-B-002-V6' 
+WHERE FormatosId = 2
+
+UPDATE FormatosCargaExcel SET
+ClaveFormatoEmergente = 'LM-BOD-FOR-1-003-V6' 
+WHERE FormatosId = 4
+--..............................................--
+UPDATE FormatosCargaExcel SET
+ClaveFormato = 'LM-BOD-FOR-A-001-V5' 
+WHERE FormatosId = 1
+
+UPDATE FormatosCargaExcel SET
+ClaveFormato = 'LM-BOD-FOR-B-002-V5' 
+WHERE FormatosId = 2
+
+UPDATE FormatosCargaExcel SET
+ClaveFormato = 'LM-BOD-FOR-1-003-V5' 
+WHERE FormatosId = 4
+
+
+VERSIONES ACTUALES EN DESA ANTES DE AJUSTE MULTIVERSION TRADICIONAL - EMERGENTE
+1	- LM-BOD-FOR-A-001-V6
+2	- LM-BOD-FOR-B-002-V6
+4	- LM-BOD-FOR-1-003-V6
+10	- LM-FOR-EPR-001-V1
+11	- LM-FOR-ECRM-001-V1
+
+VERSIONES ACTUALES EN PROD AL 22 ABRIL 2026
+1	- LM-BOD-FOR-A-001-V5
+2	- LM-BOD-FOR-B-002-V5
+4	- LM-BOD-FOR-1-003-V5
+
+	
+ALTER TABLE FormatosCargaExcelDesglose 
+	ADD aplicaEventoEmergente VARCHAR(1) DEFAULT 'N'
+	
+UPDATE Eventos  SET
+esEmergente = 0
+
+UPDATE Eventos  SET
+esEmergente = 1
+WHERE Nombre LIKE '%PROMOCIONES EMERGENTES%'
+
+
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
 
 ESTE NO APLICA
 CREATE TABLE EXCEL_PROMOCIONESPUBLICADAS(
@@ -521,9 +578,9 @@ udp_Reporte_DetalleAdContentCRM_rep								SIEMPRE NO
 udp_Reporte_DetalleMarketing_rep
 
 
-°*udp_Evento_CalcularPublicacionOfertasBodesa_2_pro				<------ Calculo de losreportes
-*udp_Evento_PublicarOfertasBodesa_pro
-°udp_Reporte_DetalleCalculoEmergentes_rep
+udp_Evento_CalcularPublicacionOfertasBodesa_2_pro				<------ Calculo de losreportes
+udp_Evento_PublicarOfertasBodesa_pro
+udp_Reporte_DetalleCalculoEmergentes_rep
 
 
 udp_Evento_CalcularPublicacionOfertasBodesa_pro					SIEMPRE NO
@@ -541,37 +598,47 @@ udp_Evento_MensajesSalientesResultado_ins
 udp_Evento_MensajesSalientesResultado_act
 udp_Seguimiento_Eventos_sel
 udp_Seguimiento_Medios_sel
-*udp_Oferta_AutorizaPreciosEspeciales_ups
+udp_Oferta_AutorizaPreciosEspeciales_ups
 
 udp_Oferta_CalcularCategoriaEnEspacio_sel
 udp_Oferta_DatosParaCorreoVoBo_rep
 
-°udp_Reporte_DetalleParaCorreoLaMarina_rep
-°udp_Reporte_DetalleParaCorreoElBodegon_rep
-°udp_Reporte_DetalleMarketing_rep
-°udp_Reporte_DetalleParaCedis_rep
-°udp_Reporte_DetalleParaInventario_rep
-°udp_Reporte_DetalleParaProgramacionCelerity_rep
-°udp_Reporte_DetalleParaProgramacionElBodegon_rep
-°udp_Reporte_DetalleParaProgramacionMax4less_rep
-°udp_Reporte_DetalleParaProgramacionVtaLinea_rep
-°udp_Reporte_DetalleVentasElBodegon_rep
-°udp_Reporte_DetalleVentasLaMarina_rep
+udp_Reporte_DetalleParaCorreoLaMarina_rep
+udp_Reporte_DetalleParaCorreoElBodegon_rep
+udp_Reporte_DetalleMarketing_rep
+udp_Reporte_DetalleParaCedis_rep
+udp_Reporte_DetalleParaInventario_rep
+udp_Reporte_DetalleParaProgramacionCelerity_rep
+udp_Reporte_DetalleParaProgramacionElBodegon_rep
+udp_Reporte_DetalleParaProgramacionMax4less_rep
+udp_Reporte_DetalleParaProgramacionVtaLinea_rep
+udp_Reporte_DetalleVentasElBodegon_rep
+udp_Reporte_DetalleVentasLaMarina_rep
 
 
 
-*udp_Oferta_sel
+udp_Oferta_sel
 udp_Oferta_EspacioPromocionalMecanicas_ups
 udp_Oferta_EspacioPromocionalPorTipoMedio_sel
+
 °udp_Oferta_ProcesaExcel_Ofertas_Multiformato_pro
-udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Fechas_pro
-udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_PromPub_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Fechas_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_PromPub_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Banderas_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Claves_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Enteros_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Fechas_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Generales_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Montos_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_OtrosDatos_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Porcentaje_pro
+°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Precios_pro
 udp_Oferta_ImportaOfertas_Multiformato_pro
 udp_Oferta_ImportaOfertas_Multiformato_Asignacion_pro
 udp_Evento_ProcesaExcel_Publicacion_Multiformato_pro			SIEMPRE NO
 udp_Oferta_Validaciones_Por_Formato_pro							SIEMPRE NO
 udp_Oferta_ProcesaExcel_pro
-udp_Evento_ProcesaExcel_Publicacion_Multiformato_PromPublicada_pro
+°udp_Evento_ProcesaExcel_Publicacion_Multiformato_PromPublicada_pro
 udp_Evento_ProcesaExcel_Publicacion_Multiformato_CRM_pro
 ValidaIntegridad 
 
@@ -601,7 +668,7 @@ udp_Direccion_PromocionPublicada_GruposArticulos_upd
 
 udp_Direccion_CrmPublicada_sel	
 
-*udp_UsuariosCorreos_sel
+udp_UsuariosCorreos_sel
 udp_BanderasProcesamientoPublicacion_sel
 udp_Evento_ActualizaEstadoPublicacion_pro
 
