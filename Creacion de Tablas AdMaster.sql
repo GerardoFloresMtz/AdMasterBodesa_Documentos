@@ -494,33 +494,43 @@ CREATE UNIQUE INDEX PK_UsuariosZonas ON UsuariosZonas (UsuariosId, ZonasId);
 
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
-ALTER TABLE Eventos 
+°ALTER TABLE Eventos 
 	ADD esEmergente BIT DEFAULT 0
 
-ALTER TABLE FormatosCargaExcel 
+°CREATE TABLE EXCELGENTEMP_EVENTO(
+	TRANSACTIONID	BIGINT,
+	EventosId		BIGINT,
+	UsuariosId		BIGINT,
+	FechaCreacion	DATETIME
+)
+
+°CREATE UNIQUE INDEX PK_EXCELGENTEMP_EVENTO  ON EXCELGENTEMP_EVENTO (TRANSACTIONID, EventosId)
+
+
+°ALTER TABLE FormatosCargaExcel 
 	ADD ClaveFormatoEmergente VARCHAR(30)
 
-UPDATE FormatosCargaExcel SET
+°UPDATE FormatosCargaExcel SET
 ClaveFormatoEmergente = 'LM-BOD-FOR-A-001-V6' 
 WHERE FormatosId = 1
 
-UPDATE FormatosCargaExcel SET
+°UPDATE FormatosCargaExcel SET
 ClaveFormatoEmergente = 'LM-BOD-FOR-B-002-V6' 
 WHERE FormatosId = 2
 
-UPDATE FormatosCargaExcel SET
+°UPDATE FormatosCargaExcel SET
 ClaveFormatoEmergente = 'LM-BOD-FOR-1-003-V6' 
 WHERE FormatosId = 4
 --..............................................--
-UPDATE FormatosCargaExcel SET
+°UPDATE FormatosCargaExcel SET
 ClaveFormato = 'LM-BOD-FOR-A-001-V5' 
 WHERE FormatosId = 1
 
-UPDATE FormatosCargaExcel SET
+°UPDATE FormatosCargaExcel SET
 ClaveFormato = 'LM-BOD-FOR-B-002-V5' 
 WHERE FormatosId = 2
 
-UPDATE FormatosCargaExcel SET
+°UPDATE FormatosCargaExcel SET
 ClaveFormato = 'LM-BOD-FOR-1-003-V5' 
 WHERE FormatosId = 4
 
@@ -538,13 +548,26 @@ VERSIONES ACTUALES EN PROD AL 22 ABRIL 2026
 4	- LM-BOD-FOR-1-003-V5
 
 	
-ALTER TABLE FormatosCargaExcelDesglose 
+°ALTER TABLE FormatosCargaExcelDesglose 
 	ADD aplicaEventoEmergente VARCHAR(1) DEFAULT 'N'
+
+°ALTER TABLE FormatosCargaExcelDesglose 
+	ADD APP_VIEW_CONFIG_GRID_CFG_ID BIGINT 
+
+°ALTER TABLE FormatosCargaExcel 
+	ADD InicioVigencia 	DATE
+
+°ALTER TABLE FormatosCargaExcel
+	ADD FinVigencia		DATE
 	
-UPDATE Eventos  SET
+°UPDATE FormatosCargaExcel SET
+	InicioVigencia 	= '2010-01-01',
+	FinVigencia		= '2060-12-31'
+
+°UPDATE Eventos  SET
 esEmergente = 0
 
-UPDATE Eventos  SET
+°UPDATE Eventos  SET
 esEmergente = 1
 WHERE Nombre LIKE '%PROMOCIONES EMERGENTES%'
 
@@ -633,7 +656,7 @@ udp_Oferta_EspacioPromocionalPorTipoMedio_sel
 °udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_OtrosDatos_pro
 °udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Porcentaje_pro
 °udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Precios_pro
-udp_Oferta_ImportaOfertas_Multiformato_pro
+°udp_Oferta_ImportaOfertas_Multiformato_pro
 udp_Oferta_ImportaOfertas_Multiformato_Asignacion_pro
 udp_Evento_ProcesaExcel_Publicacion_Multiformato_pro			SIEMPRE NO
 udp_Oferta_Validaciones_Por_Formato_pro							SIEMPRE NO
@@ -672,10 +695,9 @@ udp_UsuariosCorreos_sel
 udp_BanderasProcesamientoPublicacion_sel
 udp_Evento_ActualizaEstadoPublicacion_pro
 
-udp_Oferta_EncabezadosTablaDetallesMultiformato_sel   NO APLICA
-udp_Oferta_PromocionesDetalles_sel
+udp_Oferta_EncabezadosTablaDetallesMultiformato_sel   +Agrego Parametro de EventosId
+°udp_Oferta_PromocionesDetalles_sel
 
-?udp_Oferta_EncabezadosTablaDetallesMultiformato_sel
 ?udp_Oferta_PromocionesDetalles_sel
 	CapturaOfertas.ts-->initColumnas  		agregar evento
 	StructureService.ts --> getViewByAppId  agregar evento
