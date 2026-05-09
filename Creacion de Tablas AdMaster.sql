@@ -3,19 +3,23 @@
 -----------------------------------------------------------------------------------
 --2024-05-19
 
-CREATE TABLE TmpFechaProceso (
-	FechaProceso 					DATE,
+°CREATE TABLE TmpFechaProceso (
+	FechaProceso 					DATE,		--- Fecha Semana Operacion Emergentes de los compradores
 	EstadoProceso					CHAR(4),		
 			-- ALT (ALTA) / INI (INICIO) / INC (Inicio Calculo) / FIC (Fin Calculo) / FCSE (ERROR CALCULO)
 			-- INT (Inicio Transmitir) / FIT (Fin Transmitir)   / FTSE (ERROR TRANSMISION) 
 			-- ITJ (Inicio Transmitir) / FTJ (Fin Transmitir)   / FTJE (ERROR TRANSMISION) 
 			-- PRG (Calculo Siguiente Programacion)
 	FechaSiguienteEjecucion			DATE,
+	FechaProcesamientoReporte		DATE,		--- Fecha Semana Generacion Reporte, se manejan 2 fechas porque 
+												---	los lunes a primera hora los compradores compradores operan los espacios con FechaProceso ya		
+												---	el reporte se genera durante el lunes en la mañana
 	FechaInicioMediosEnRecopilacion	DATE,		---??? Confirmar
 	FechaFinalMediosEnRecopilacion	DATE		---??? Confirmar
 )
 
-ALTER 
+ALTER TABLE TmpFechaProceso
+	ADD FechaProcesamientoReporte		DATE
 
 *CREATE TABLE LogProcesoPublicacion (
 	FolioId			BIGINT,
@@ -504,33 +508,33 @@ CREATE UNIQUE INDEX PK_UsuariosZonas ON UsuariosZonas (UsuariosId, ZonasId);
 	FechaCreacion	DATETIME
 )
 
-°CREATE UNIQUE INDEX PK_EXCELGENTEMP_EVENTO  ON EXCELGENTEMP_EVENTO (TRANSACTIONID, EventosId)
+CREATE UNIQUE INDEX PK_EXCELGENTEMP_EVENTO  ON EXCELGENTEMP_EVENTO (TRANSACTIONID, EventosId)
 
 
-°ALTER TABLE FormatosCargaExcel 
+ALTER TABLE FormatosCargaExcel 
 	ADD ClaveFormatoEmergente VARCHAR(30)
 
-°UPDATE FormatosCargaExcel SET
+UPDATE FormatosCargaExcel SET
 ClaveFormatoEmergente = 'LM-BOD-FOR-A-001-V6' 
 WHERE FormatosId = 1
 
-°UPDATE FormatosCargaExcel SET
+UPDATE FormatosCargaExcel SET
 ClaveFormatoEmergente = 'LM-BOD-FOR-B-002-V6' 
 WHERE FormatosId = 2
 
-°UPDATE FormatosCargaExcel SET
+UPDATE FormatosCargaExcel SET
 ClaveFormatoEmergente = 'LM-BOD-FOR-1-003-V6' 
 WHERE FormatosId = 4
 --..............................................--
-°UPDATE FormatosCargaExcel SET
+UPDATE FormatosCargaExcel SET
 ClaveFormato = 'LM-BOD-FOR-A-001-V5' 
 WHERE FormatosId = 1
 
-°UPDATE FormatosCargaExcel SET
+UPDATE FormatosCargaExcel SET
 ClaveFormato = 'LM-BOD-FOR-B-002-V5' 
 WHERE FormatosId = 2
 
-°UPDATE FormatosCargaExcel SET
+UPDATE FormatosCargaExcel SET
 ClaveFormato = 'LM-BOD-FOR-1-003-V5' 
 WHERE FormatosId = 4
 
@@ -548,26 +552,26 @@ VERSIONES ACTUALES EN PROD AL 22 ABRIL 2026
 4	- LM-BOD-FOR-1-003-V5
 
 	
-°ALTER TABLE FormatosCargaExcelDesglose 
+ALTER TABLE FormatosCargaExcelDesglose 
 	ADD aplicaEventoEmergente VARCHAR(1) DEFAULT 'N'
 
-°ALTER TABLE FormatosCargaExcelDesglose 
+ALTER TABLE FormatosCargaExcelDesglose 
 	ADD APP_VIEW_CONFIG_GRID_CFG_ID BIGINT 
 
-°ALTER TABLE FormatosCargaExcel 
+ALTER TABLE FormatosCargaExcel 
 	ADD InicioVigencia 	DATE
 
-°ALTER TABLE FormatosCargaExcel
+ALTER TABLE FormatosCargaExcel
 	ADD FinVigencia		DATE
 	
-°UPDATE FormatosCargaExcel SET
+UPDATE FormatosCargaExcel SET
 	InicioVigencia 	= '2010-01-01',
 	FinVigencia		= '2060-12-31'
 
-°UPDATE Eventos  SET
+UPDATE Eventos  SET
 esEmergente = 0
 
-°UPDATE Eventos  SET
+UPDATE Eventos  SET
 esEmergente = 1
 WHERE Nombre LIKE '%PROMOCIONES EMERGENTES%'
 
@@ -596,14 +600,14 @@ AccesoEspaciosPromocionales
 Creacion sp
 udp_Reporte_SubReportesParaAdContent_rep						SIEMPRE NO
 udp_Reportes_DetalleAlSuper_rep
-udp_Reporte_DetalleAdContent_rep
+°udp_Reporte_DetalleAdContent_rep
 udp_Reporte_DetalleAdContentCRM_rep								SIEMPRE NO
 udp_Reporte_DetalleMarketing_rep
 
 
-udp_Evento_CalcularPublicacionOfertasBodesa_2_pro				<------ Calculo de losreportes
-udp_Evento_PublicarOfertasBodesa_pro
-udp_Reporte_DetalleCalculoEmergentes_rep
+°udp_Evento_CalcularPublicacionOfertasBodesa_2_pro				<------ Calculo de losreportes
+°udp_Evento_PublicarOfertasBodesa_pro
+°udp_Reporte_DetalleCalculoEmergentes_rep
 
 
 udp_Evento_CalcularPublicacionOfertasBodesa_pro					SIEMPRE NO
@@ -644,24 +648,24 @@ udp_Oferta_sel
 udp_Oferta_EspacioPromocionalMecanicas_ups
 udp_Oferta_EspacioPromocionalPorTipoMedio_sel
 
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Fechas_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_PromPub_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Banderas_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Claves_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Enteros_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Fechas_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Generales_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Montos_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_OtrosDatos_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Porcentaje_pro
-°udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Precios_pro
-°udp_Oferta_ImportaOfertas_Multiformato_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Fechas_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_PromPub_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Banderas_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Claves_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Enteros_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Fechas_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Generales_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Montos_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_OtrosDatos_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Porcentaje_pro
+udp_Oferta_ProcesaExcel_Ofertas_Multiformato_Obtiene_Precios_pro
+udp_Oferta_ImportaOfertas_Multiformato_pro
 udp_Oferta_ImportaOfertas_Multiformato_Asignacion_pro
 udp_Evento_ProcesaExcel_Publicacion_Multiformato_pro			SIEMPRE NO
 udp_Oferta_Validaciones_Por_Formato_pro							SIEMPRE NO
 udp_Oferta_ProcesaExcel_pro
-°udp_Evento_ProcesaExcel_Publicacion_Multiformato_PromPublicada_pro
+udp_Evento_ProcesaExcel_Publicacion_Multiformato_PromPublicada_pro
 udp_Evento_ProcesaExcel_Publicacion_Multiformato_CRM_pro
 ValidaIntegridad 
 
@@ -696,7 +700,7 @@ udp_BanderasProcesamientoPublicacion_sel
 udp_Evento_ActualizaEstadoPublicacion_pro
 
 udp_Oferta_EncabezadosTablaDetallesMultiformato_sel   +Agrego Parametro de EventosId
-°udp_Oferta_PromocionesDetalles_sel
+udp_Oferta_PromocionesDetalles_sel
 
 ?udp_Oferta_PromocionesDetalles_sel
 	CapturaOfertas.ts-->initColumnas  		agregar evento
@@ -1006,4 +1010,110 @@ INSERT INTO PARAMETROS
 
 INSERT INTO PARAMETROS
  VALUES(94, 'EsInicioCicloEmergentes', 'Es primer Ciclo de Emergentes', 'S', 'VARCHAR', 1, 1, GETDATE(), NULL, 1, NULL)
+
+
+
+
+
+
+
+
+Scheduler de los domingos a las 23:00
+--------------------------------//////////////////////////////--------------------------------------
+--------------------------------//////////////////////////////--------------------------------------
+--------------------------------//////////////////////////////--------------------------------------
+DECLARE @FolioIdLog INT
+
+SELECT @FolioIdLog = A.FolioTransaccionId + 1
+	FROM FoliosTransacciones A
+	WHERE Proceso = 'LogPublicacion'
+
+IF(@FolioIdLog IS NULL) BEGIN
+	SET @FolioIdLog = 1
+END
+
+----..............................----
+UPDATE FoliosTransacciones SET
+	FolioTransaccionId = @FolioIdLog
+	WHERE Proceso = 'LogPublicacion'
+----..............................----
+ 
+--------------------------------//////////////////////////////--------------------------------------
+DECLARE @FechaUltimaGeneracionReporte DATE
+
+SELECT @FechaUltimaGeneracionReporte = A.FechaProcesamientoReporte
+	FROM TmpFechaProceso A
+
+IF (@FechaUltimaGeneracionReporte  IS NULL) BEGIN
+	SET @FechaUltimaGeneracionReporte  = DATEADD(   DAY,
+													-((DATEPART(WEEKDAY, GETDATE()) + @@DATEFIRST - 2) % 7),
+													GETDATE() )
+
+END
+
+			---SELECT FechaUltimaGeneracionReporte = @FechaUltimaGeneracionReporte
+SET @FechaUltimaGeneracionReporte  = DATEADD(DAY, 7, @FechaUltimaGeneracionReporte ) 
+			---SELECT FechaUltimaGeneracionReporte = @FechaUltimaGeneracionReporte
+
+UPDATE TmpFechaProceso SET
+	FechaProcesamientoReporte = @FechaUltimaGeneracionReporte
+
+INSERT INTO LogProcesoPublicacion
+	VALUES ( @FolioIdLog, 'ACT_FECHA_GEN_REPORTE', 'Actualizacion de Fecha a ' + CONVERT(VARCHAR(10), @FechaUltimaGeneracionReporte, 120) , 'ALT', GETDATE() )
+
+--------------------------------//////////////////////////////--------------------------------------
+----..............................----
+SET @FolioIdLog = @FolioIdLog + 1
+UPDATE FoliosTransacciones SET
+	FolioTransaccionId = @FolioIdLog
+	WHERE Proceso = 'LogPublicacion'
+----..............................----
+
+DECLARE @FechaCorteEmergentes DATE
+
+SELECT @FechaCorteEmergentes = A.FechaProceso
+	FROM TmpFechaProceso A
+
+IF (@FechaCorteEmergentes IS NULL) BEGIN
+	SET @FechaCorteEmergentes  = DATEADD( DAY,
+													-((DATEPART(WEEKDAY, GETDATE()) + @@DATEFIRST - 2) % 7),
+													GETDATE() )
+END
+
+SET @FechaCorteEmergentes  = DATEADD(DAY, 7, @FechaCorteEmergentes ) 
+INSERT INTO LogProcesoPublicacion
+	VALUES ( @FolioIdLog, 'CIERRE_SEM_OPE_EMERGENTES', 'Cierre de Operacion de Emergentes -> ' + CONVERT(VARCHAR(10), @FechaCorteEmergentes, 120) , 'ALT', GETDATE() )
+
+----..............................----
+SET @FolioIdLog = @FolioIdLog + 1
+UPDATE FoliosTransacciones SET
+	FolioTransaccionId = @FolioIdLog
+	WHERE Proceso = 'LogPublicacion'
+----..............................----
+
+UPDATE TmpFechaProceso SET
+	FechaProceso = @FechaCorteEmergentes
+
+INSERT INTO LogProcesoPublicacion
+	VALUES ( @FolioIdLog, 'ACT_FECHA_OPE_EMERGENTES', 'Actualizacion de Fecha a ' + CONVERT(VARCHAR(10), @FechaCorteEmergentes, 120) , 'ALT', GETDATE() )
+
+----..............................----
+SET @FolioIdLog = @FolioIdLog + 1
+UPDATE FoliosTransacciones SET
+	FolioTransaccionId = @FolioIdLog
+	WHERE Proceso = 'LogPublicacion'
+----..............................----
+ 
+exec udp_Evento_CierraSemanaRegistoOfertas_pro @FechaCorteEmergentes
+
+DECLARE @FechaSigPublicacion DATE
+SET @FechaSigPublicacion =  DATEADD(DAY, 7, @FechaCorteEmergentes )
+
+INSERT INTO LogProcesoPublicacion
+	VALUES ( @FolioIdLog, 'INICIO_SEM_OPE_EMERGENTES', 'Inicio de Operacion de Emergentes ->' + CONVERT(VARCHAR(10), @FechaCorteEmergentes, 120) 
+														+ ', para publicarse el ' +  CONVERT(VARCHAR(10), @FechaSigPublicacion, 120)  , 'ALT', GETDATE() )
+
+--------------------------------//////////////////////////////--------------------------------------
+--------------------------------//////////////////////////////--------------------------------------
+--------------------------------//////////////////////////////--------------------------------------
 
