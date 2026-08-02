@@ -30,6 +30,21 @@ ALTER TABLE TmpFechaProceso
 )
 
 -----------------------------------------------------------------------------------
+---------------------TABLAS PARA ADMINITRACION DE CARGAS --------------------------
+-----------------------------------------------------------------------------------
+CREATE TABLE EventosDiseño(
+	EventosId						BIGINT,
+	ObjetosFileId					BIGINT
+)
+
+CREATE TABLE MovimientosPublicacion(
+	MovimientosId					BIGINT,
+	PublicacionId					BIGINT,
+	Accion							VARCHAR(3),		-- CAA --> Carga Archivo, DEA --> Descarga Archivo, VIA --> Visualizar archivo
+	Descripcion 					VARCHAR(200),
+	ObjetosFileId					BIGINT
+)
+-----------------------------------------------------------------------------------
 ------------------------------   TABLAS DE  PUBLICACION ---------------------------
 -----------------------------------------------------------------------------------
 CREATE TABLE Publicacion (
@@ -38,6 +53,12 @@ CREATE TABLE Publicacion (
 	EventosId						BIGINT,
 	FechaInicio						DATE,
 	FechaFinal						DATE,
+	DescripcionPublicacion			VARCHAR(400),
+	StatusDiseñoPublicacion			VARCHAR(3),			-- EVE --> HACE REFERENCIA A EventosDiseño, SEM --> Nuevo Diseño cargado despues al inicial
+	DiseñoObjetosFileId				BIGINT,				-- NULL SI CAMPO ANTERIOR ES EVE
+	StatusActualizacionExcel		VARCHAR(3),			-- CAL --> Ofertas de Publicacion correspondiente al Calculo, UPD --> ARCHIVO EXCEL CARGADO 
+	ExcelCargaObjetosFileId			BIGINT,
+	StatusPublicacion				VARCHAR(3),
 	FechaCreacion					DATETIME,
 	UsuarioCreadorId				BIGINT,
 	FechaModificacion				DATETIME,
@@ -82,8 +103,8 @@ CREATE TABLE PublicacionMecanicas (
 )
 CREATE UNIQUE INDEX PK_PublicacionMecanicas ON PublicacionMecanicas (PublicacionId, MecanicasId);
 
-_*CREATE TABLE PromocionPublicada (
-	PromocionPublicadaId			BIGINT,
+CREATE TABLE PromocionDireccion (				--- ANTES PromocionPublicada
+	PromocionDireccionId			BIGINT,
 	FormatoCargaId					BIGINT,
 	EventosId						BIGINT,
 	NombreEvento					VARCHAR(300),
@@ -107,8 +128,8 @@ _*CREATE TABLE PromocionPublicada (
 )
 CREATE UNIQUE INDEX PK_PromocionPublicada ON PromocionPublicada (PromocionPublicadaId);
 
-CREATE TABLE PromocionPublicadaSubCategorias (
-	PromocionPublicadaId			BIGINT,
+CREATE TABLE PromocionDireccionSubCategorias (			-- ANTES PromocionPublicadaSubCategorias 
+	PromocionDireccionId			BIGINT,
 	SubCategoriasId					BIGINT,
 	SubNombreCategoria				VARCHAR(300),
 	FechaCreacion					DATETIME,
@@ -116,11 +137,11 @@ CREATE TABLE PromocionPublicadaSubCategorias (
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionPublicadaSubCategorias ON PromocionPublicadaSubCategorias (PromocionPublicadaId, SubCategoriasId);
+CREATE UNIQUE INDEX PK_PromocionDireccionSubCategorias ON PromocionDireccionSubCategorias (PromocionPublicadaId, SubCategoriasId);
 
 
-CREATE TABLE PromocionPublicadaCategorias (
-	PromocionPublicadaId			BIGINT,
+CREATE TABLE PromocionDireccionCategorias (				-- ANTES PromocionPublicadaCategorias
+	PromocionDireccionId			BIGINT,
 	CategoriasId					BIGINT,
 	NombreCategoria					VARCHAR(300),
 	FechaCreacion					DATETIME,
@@ -128,10 +149,10 @@ CREATE TABLE PromocionPublicadaCategorias (
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionPublicadaCategorias ON PromocionPublicadaCategorias (PromocionPublicadaId, CategoriasId);
+CREATE UNIQUE INDEX PK_PromocionDireccionCategorias ON PromocionDireccionCategorias (PromocionPublicadaId, CategoriasId);
 
-CREATE TABLE PromocionPublicadaProveedores (
-	PromocionPublicadaId			BIGINT,
+CREATE TABLE PromocionDireccionProveedores (			--- ANTES PromocionPublicadaProveedores
+	PromocionDireccionId			BIGINT,
 	ProveedoresId					BIGINT,
 	NombreProveedor					VARCHAR(300),
 	FechaCreacion					DATETIME,
@@ -139,10 +160,10 @@ CREATE TABLE PromocionPublicadaProveedores (
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionPublicadaProveedores ON PromocionPublicadaProveedores (PromocionPublicadaId, ProveedoresId);
+CREATE UNIQUE INDEX PK_PromocionDireccionProveedores ON PromocionDireccionProveedores (PromocionPublicadaId, ProveedoresId);
 
-CREATE TABLE PromocionPublicadaMarcas (
-	PromocionPublicadaId			BIGINT,
+CREATE TABLE PromocionDireccionMarcas (			--- ANTES PromocionPublicadaMarcas
+	PromocionDireccionId			BIGINT,
 	MarcasId						VARCHAR(10),
 	NombreMarcas					VARCHAR(300),
 	FechaCreacion					DATETIME,
@@ -150,10 +171,10 @@ CREATE TABLE PromocionPublicadaMarcas (
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionPublicadaMarcas ON PromocionPublicadaMarcas (PromocionPublicadaId, MarcasId);
+CREATE UNIQUE INDEX PK_PromocionDireccionMarcas ON PromocionDireccionMarcas (PromocionPublicadaId, MarcasId);
 
-CREATE TABLE PromocionPublicadaGruposArticulos (
-	PromocionPublicadaId			BIGINT,
+CREATE TABLE PromocionDireccionGruposArticulos (			--- ANTES PromocionPublicadaGruposArticulos
+	PromocionDireccionId			BIGINT,
 	GruposArticulosId				BIGINT,
 	NombreGruposArticulos			VARCHAR(300),
 	FechaCreacion					DATETIME,
@@ -161,10 +182,10 @@ CREATE TABLE PromocionPublicadaGruposArticulos (
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionPublicadaGruposArticulos ON PromocionPublicadaGruposArticulos (PromocionPublicadaId, GruposArticulosId);
+CREATE UNIQUE INDEX PK_PromocionDireccionGruposArticulos ON PromocionDireccionGruposArticulos (PromocionPublicadaId, GruposArticulosId);
 
 
-CREATE TABLE PromocionPublicadaMecanicas (
+CREATE TABLE PromocionPublicadaMecanicas (			--- BORRAR TABLA  ---
 	PromocionPublicadaId			BIGINT,
 	MecanicasId						BIGINT,
 	EventosId						BIGINT,
@@ -196,7 +217,7 @@ CREATE UNIQUE INDEX PK_CrmPublicado ON CrmPublicado (CrmPublicadoId);
 ---------------------------------------------------------------------------------
 CREATE TABLE PublicacionDatosBase	(
 		PublicacionId				BIGINT, 
-		PromocionPublicadaId		BIGINT,
+		PromocionDireccionId		BIGINT,					-- CAMBIO NOMBRE DE CAMPO ANTES PromocionPublicadaId --
 		EspacioPromocionalesId		BIGINT,
 		EventosId					BIGINT,
 		NombreEvento				VARCHAR(300)	NULL,		
@@ -260,7 +281,7 @@ CREATE TABLE PublicacionDatosBase	(
 CREATE 		 INDEX PK_PublicacionDatosBase 			ON PublicacionDatosBase (PublicacionId, PromocionPublicadaId, EspacioPromocionalesId, DetallesId );
 CREATE  	  INDEX PK_PublicacionDatosBase_DetallesId 	ON PublicacionDatosBase (DetallesId );	
 	
-CREATE TABLE PublicacionEncuentasAdStore	(
+CREATE TABLE PublicacionEncuentasAdStore	(				--- YA NO SE USA --
 		PublicacionId					BIGINT,
 		EncuestaId						BIGINT,
 		NombreEncuesta					VARCHAR(800),
@@ -272,7 +293,7 @@ CREATE TABLE PublicacionEncuentasAdStore	(
 	)
 CREATE 		 INDEX PK_PublicacionEncuentasAdStore ON PublicacionEncuentasAdStore (PublicacionId, EncuestaId );
 
-CREATE TABLE PublicacionEncuentasAdStoreMediosTiendas (
+CREATE TABLE PublicacionEncuentasAdStoreMediosTiendas (		--- YA NO SE USA --
 		PublicacionId					BIGINT,
 		EncuestaId						BIGINT,
 		MediosId						BIGINT,
@@ -280,7 +301,7 @@ CREATE TABLE PublicacionEncuentasAdStoreMediosTiendas (
 	)
 CREATE 		 INDEX PK_PublicacionEncuentasAdStoreMediosTiendas ON PublicacionEncuentasAdStoreMediosTiendas (PublicacionId, EncuestaId, MediosId, TiendasId );
 
-CREATE TABLE EncuentasAdStoreCategorias		(
+CREATE TABLE EncuentasAdStoreCategorias		(				--- YA NO SE USA --
 		PublicacionId					BIGINT,
 		EncuestaId						BIGINT,
 		CategoriasId					BIGINT,
@@ -291,7 +312,7 @@ CREATE TABLE EncuentasAdStoreCategorias		(
 CREATE 		 INDEX PK_EncuentasAdStoreCategorias ON EncuentasAdStoreCategorias (PublicacionId, EncuestaId, CategoriasId );
 
 	
-CREATE TABLE  EncuentasAdStorePreguntas		(
+CREATE TABLE  EncuentasAdStorePreguntas		(				--- YA NO SE USA --
 		PublicacionId					BIGINT,
 		EncuestaId						BIGINT,
 		DetallesId						BIGINT,
@@ -309,7 +330,7 @@ CREATE TABLE  EncuentasAdStorePreguntas		(
 	)
 CREATE UNIQUE INDEX PK_EncuentasAdStorePreguntas ON EncuentasAdStorePreguntas (PublicacionId, EncuestaId, PreguntaId, DetallesId );
 
-CREATE TABLE  EncuentasAdContent		(
+CREATE TABLE  EncuentasAdContent		(					--- YA NO SE USA --
 		PublicacionId					BIGINT,
 		EncuestaId						BIGINT,
 		DetallesId						BIGINT,
@@ -347,12 +368,15 @@ CREATE UNIQUE INDEX PK_ObjetosJson ON ObjetosJson (ObjetosJsonId, ConsecutivoId)
 
 CREATE TABLE ObjetosFile(
 	ObjetosFileId			BIGINT,
-	ConsecutivoId			BIGINT,
+	OrigenArchivo			VARCHAR(10),		-- ORIGEN DE ARCHIVO, MEC --> EXCEL CARGA MECANICAS, 
+																	  APE --> Administracion Publicacion Excel, 
+																	  APD --> Administracion Publicacion Diseño
+	ConsecutivoId			BIGINT,				--- BORRAR CAMPO ---
 	NombreArchivo			VARCHAR(200),
 	Extension				VARCHAR(10),
-	FileBase64Str			VARCHAR(2000),
-	CantidadCarPaquete		BIGINT,
-	CantidadCarEntregados	BIGINT,
+	FileBase64Str			VARCHAR(MAX)		--VARCHAR(2000),
+	CantidadCarPaquete		BIGINT,				--- BORRAR CAMPO ---
+	CantidadCarEntregados	BIGINT,				--- BORRAR CAMPO ---
 	TotalCaracteres			BIGINT,
 	LongitudArchivo			BIGINT,
 	FechaCreacion			DATETIME,
@@ -396,7 +420,7 @@ CREATE TABLE MensajesSalientesPerfilesAdContent(
 );
 CREATE UNIQUE INDEX PK_MensajesSalientesPerfilesAdContent ON MensajesSalientesPerfilesAdContent ( MensajesSalientesId, PerfilesAdContentId );
 
-CREATE TABLE MensajesSalientesTiendasAdStore(
+CREATE TABLE MensajesSalientesTiendasAdStore(			-- YA NO SE USA --
 	MensajesSalientesId		BIGINT,
 	TiendasId				BIGINT,
 	FechaCreacion			DATETIME,
@@ -441,7 +465,7 @@ CREATE UNIQUE INDEX PK_TiendasPerfilesAdContent ON TiendasPerfilesAdContent (Tie
 ///---------------------------------------------------------///
 ///------------- RELACION RUTAS TIENDAS ADCONTENT ----------///
 ///---------------------------------------------------------///
-CREATE TABLE TiendasRutasAdStore(
+CREATE TABLE TiendasRutasAdStore(					-- YA NO SE USA --
 	TiendasId				BIGINT,
 	RutasId					VARCHAR(50),
 	Activo					BIT,
@@ -454,7 +478,7 @@ CREATE UNIQUE INDEX PK_TiendasRutasAdStore ON TiendasRutasAdStore (TiendasId, Ru
 -----------------------------------------------------------------------------------
 ------------------------------   CARGA DE ARCHIVOS	   ----------------------------
 -----------------------------------------------------------------------------------
-CREATE TABLE EXCEL_PROMOCIONESPUBLICADAS(
+CREATE TABLE EXCEL_PROMOCIONESDIRECCION(			--- YA NO SE USA EXCEL_PROMOCIONESPUBLICADAS --
 	TRANSACTIONID					BIGINT,
 	OfertaExcelId					BIGINT,
 	PromocionPublicadaId			BIGINT,
@@ -475,16 +499,16 @@ CREATE TABLE EXCEL_PROMOCIONESPUBLICADAS(
 	FechaCreacion					DATETIME,
 	UsuarioCreadorId				BIGINT	
 )
-ALTER TABLE EXCEL_PROMOCIONESPUBLICADAS ADD ObservacionHaciaMarketing		VARCHAR(300) NULL
+ALTER TABLE EXCEL_PROMOCIONESDIRECCION ADD ObservacionHaciaMarketing		VARCHAR(300) NULL
 
-CREATE UNIQUE INDEX PK_EXCEL_PROMOCIONESPUBLICADAS ON EXCEL_PROMOCIONESPUBLICADAS (TRANSACTIONID, OfertaExcelId);
+CREATE UNIQUE INDEX PK_EXCEL_PROMOCIONESDIRECCION ON EXCEL_PROMOCIONESDIRECCION (TRANSACTIONID, OfertaExcelId);
 
-CREATE TABLE EXCEL_PROMOCIONESPUBLICADAS_MECANICAS(
+CREATE TABLE EXCEL_PROMOCIONESDIRECCION_MECANICAS(			--- YA NO SE USA ANTES EXCEL_PROMOCIONESPUBLICADAS_MECANICAS --
 	TRANSACTIONID					BIGINT,
 	OfertaExcelId					BIGINT,
 	OfertaExcelId_PreMecanicas		BIGINT
 )
-CREATE INDEX FK_EXCEL_PROMOCIONESPUBLICADAS_MECANICAS ON EXCEL_PROMOCIONESPUBLICADAS_MECANICAS (TRANSACTIONID, OfertaExcelId, OfertaExcelId_PreMecanicas);
+CREATE INDEX FK_EXCEL_PROMOCIONESDIRECCION_MECANICAS_MECANICAS ON EXCEL_PROMOCIONESDIRECCION_MECANICAS_MECANICAS (TRANSACTIONID, OfertaExcelId, OfertaExcelId_PreMecanicas);
 
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
