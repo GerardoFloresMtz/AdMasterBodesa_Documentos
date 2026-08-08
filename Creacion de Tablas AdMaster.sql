@@ -34,16 +34,67 @@ ALTER TABLE TmpFechaProceso
 -----------------------------------------------------------------------------------
 CREATE TABLE EventosDiseño(
 	EventosId						BIGINT,
-	ObjetosFileId					BIGINT
+	ObjetosFileId					BIGINT,
+	FechaCreacion					DATETIME,
+	UsuarioCreadorId				BIGINT,
+
 )
+CREATE UNIQUE INDEX PK_EventosDiseño ON EventosDiseño (EventosId);
 
 CREATE TABLE MovimientosPublicacion(
 	MovimientosId					BIGINT,
 	PublicacionId					BIGINT,
 	Accion							VARCHAR(3),		-- CAA --> Carga Archivo, DEA --> Descarga Archivo, VIA --> Visualizar archivo
 	Descripcion 					VARCHAR(200),
-	ObjetosFileId					BIGINT
+	ObjetosFileId					BIGINT,
+	FechaCreacion					DATETIME,
+	UsuarioCreadorId				BIGINT,
 )
+CREATE UNIQUE INDEX PK_MovimientosPublicacion ON MovimientosPublicacion (MovimientosId);
+
+CREATE TABLE PeriodosPublicacion(
+	PeriodosId						BIGINT,
+	FechaInicio						DATE,
+	FechaFinal						DATE,
+	DescripcionPeriodo				VARCHAR(400),
+	FechaCreacion					DATETIME,
+	UsuarioCreadorId				BIGINT,
+
+)
+CREATE UNIQUE INDEX PK_PeriodosPublicacion ON PeriodosPublicacion (PeriodosId);
+
+CREATE TABLE StatusAdminPublicacion(
+	StatusId							VARCHAR(3),
+	DescripcionStatus					VARCHAR(50),
+	AplicaA								VARCHAR(20),
+	FechaCreacion						DATETIME,
+	UsuarioCreadorId					BIGINT,
+
+)
+
+CREATE UNIQUE INDEX PK_StatusAdminPublicacion ON StatusAdminPublicacion (StatusId);
+
+CREATE TABLE AccionesAdminPublicacion(
+	StatusId							VARCHAR(3),
+	AccionId							VARCHAR(30),
+	StatusTransicionPublicacion			VARCHAR(3),
+	StatusTransicionExcel				VARCHAR(3),
+	StatusTransicionDiseño				VARCHAR(3),
+	FechaCreacion						DATETIME,
+	UsuarioCreadorId					BIGINT
+)
+CREATE UNIQUE INDEX PK_AccionesAdminPublicacion ON AccionesAdminPublicacion (StatusId, AccionId);
+
+CREATE TABLE IconosPorEstadosAdminPublicacion(
+	StatusPublicacionId					VARCHAR(3),
+	StatusCargaExcelId					VARCHAR(3),
+	StatusCargaDiseñoId					VARCHAR(3),
+	IconosVisiblesFront					VARCHAR(400),
+	FechaCreacion						DATETIME,
+	UsuarioCreadorId					BIGINT
+)
+CREATE UNIQUE INDEX PK_IconosPorEstadosAdminPublicacion ON IconosPorEstadosAdminPublicacion (StatusPublicacionId, StatusCargaExcelId, StatusCargaDiseñoId);
+
 -----------------------------------------------------------------------------------
 ------------------------------   TABLAS DE  PUBLICACION ---------------------------
 -----------------------------------------------------------------------------------
@@ -51,14 +102,17 @@ CREATE TABLE Publicacion (
 	PublicacionId					BIGINT,
 	ZonasId							BIGINT,
 	EventosId						BIGINT,
-	FechaInicio						DATE,
-	FechaFinal						DATE,
+	--FechaInicio						DATE,				-- BORRAR CAMPO --
+	--FechaFinal						DATE,				-- BORRAR CAMPO --
+	PeriodosId						BIGINT,
+	TiposMediosid					BIGINT,
+	TituloPublicacion				VARCHAR(200),
 	DescripcionPublicacion			VARCHAR(400),
-	StatusDiseñoPublicacion			VARCHAR(3),			-- EVE --> HACE REFERENCIA A EventosDiseño, SEM --> Nuevo Diseño cargado despues al inicial
+	StatusCargaDiseño				VARCHAR(3),			-- NOD -- SIN DISEÑO, EVE --> HACE REFERENCIA A EventosDiseño, SEM --> Nuevo Diseño cargado despues al inicial
 	DiseñoObjetosFileId				BIGINT,				-- NULL SI CAMPO ANTERIOR ES EVE
-	StatusActualizacionExcel		VARCHAR(3),			-- CAL --> Ofertas de Publicacion correspondiente al Calculo, UPD --> ARCHIVO EXCEL CARGADO 
+	StatusCargaExcel				VARCHAR(3),			-- CAL --> Ofertas de Publicacion correspondiente al Calculo, UPD --> ARCHIVO EXCEL CARGADO 
 	ExcelCargaObjetosFileId			BIGINT,
-	StatusPublicacion				VARCHAR(3),
+	StatusPublicacion				VARCHAR(3),			-- PRO --> EN PROCESO / PROCESANDO, AUT --> AUTORIZADO, TRA --> TRANSMITIDO --
 	FechaCreacion					DATETIME,
 	UsuarioCreadorId				BIGINT,
 	FechaModificacion				DATETIME,
@@ -624,14 +678,14 @@ AccesoEspaciosPromocionales
 Creacion sp
 udp_Reporte_SubReportesParaAdContent_rep						SIEMPRE NO
 udp_Reportes_DetalleAlSuper_rep
-°udp_Reporte_DetalleAdContent_rep
+udp_Reporte_DetalleAdContent_rep
 udp_Reporte_DetalleAdContentCRM_rep								SIEMPRE NO
 udp_Reporte_DetalleMarketing_rep
 
 
-°udp_Evento_CalcularPublicacionOfertasBodesa_2_pro				<------ Calculo de losreportes
-°udp_Evento_PublicarOfertasBodesa_pro
-°udp_Reporte_DetalleCalculoEmergentes_rep
+udp_Evento_CalcularPublicacionOfertasBodesa_2_pro				<------ Calculo de losreportes
+udp_Evento_PublicarOfertasBodesa_pro
+udp_Reporte_DetalleCalculoEmergentes_rep
 
 
 udp_Evento_CalcularPublicacionOfertasBodesa_pro					SIEMPRE NO
@@ -718,6 +772,12 @@ udp_Direccion_PromocionPublicada_Marcas_upd
 udp_Direccion_PromocionPublicada_GruposArticulos_upd
 
 udp_Direccion_CrmPublicada_sel	
+
+udp_AdminPublicacion_Publicacion_sel
+udp_AdminPublicacion_Publicacion_ins
+udp_AdminPublicacion_Publicacion_udp
+udp_AdminPublicacion_Publicacion_act
+
 
 udp_UsuariosCorreos_sel
 udp_BanderasProcesamientoPublicacion_sel
@@ -1140,4 +1200,148 @@ INSERT INTO LogProcesoPublicacion
 --------------------------------//////////////////////////////--------------------------------------
 --------------------------------//////////////////////////////--------------------------------------
 --------------------------------//////////////////////////////--------------------------------------
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId )
+		VALUES	( 'SIN',		'SIN INICIAR',							'PUBLICACION',	GETDATE(),		1 )
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'PRO',		'EN PROCESO',							'PUBLICACION',	GETDATE(),		1 	)
+
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'AUT',		'AUTORIZADO PARA PUBLICAR',				'PUBLICACION',	GETDATE(),		1 	)
+	
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'PRT',		'TRANSMITIENDO',						'PUBLICACION',	GETDATE(),		1 	)
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'TRA',		'TRANSMITIDO CON EXITO',				'PUBLICACION',	GETDATE(),		1 	)
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'ERT',	'ERROR EN TRANSMISION',						'PUBLICACION',	GETDATE(),		1 	)
+
+	--------------------------------CARGA_EXCEL-----------------------------------------------
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'SIO',	'SIN INFORMACION DE OFERTAS',				'CARGA_EXCEL',	GETDATE(),		1 	)
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'CAL',	'INFORMACION CALCULADA',					'CARGA_EXCEL',	GETDATE(),		1 	)
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'UPE',	'INFORMACION CARGADA POR MARKETING',		'CARGA_EXCEL',	GETDATE(),		1 	)
+
+	---------------------------------CARGA_DISEÑO-------------------------------------------------------
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'NOD',	'SIN DISEÑO',								'CARGA_DISEÑO',	GETDATE(),		1 	)
+
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'PRD',	'DISEÑO RELACIONADO AL EVENTO',				'CARGA_DISEÑO',	GETDATE(),		1 	)
+
+	INSERT INTO StatusAdminPublicacion
+				( StatusId,	DescripcionStatus,									AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+		VALUES	( 'DCP',	'DISEÑO CARGADO SOLO PARA LA PUBLICACION SEMANAL',	'CARGA_DISEÑO',	GETDATE(),		1 	)
+
+-----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------- PUBLICACION -----------------------------------------------------------------
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'SIN',			'CALCULAR',			'PRO',							'CAL',					'NOD',					GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'PRO',			'RE-CALCULAR',		'PRO',							'CAL',					'',						GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'PRO',			'AUTORIZAR',		'AUT',							'',						'',						GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'PRO',			'TRANSMITIENDO',	'PRT',							'',						'',											GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'PRT',			'ERROR_TRANSMISION', 'ERT',							'',						'',						GETDATE(),			1)
+
+-------------------------------------- EXCEL -----------------------------------------------------------------
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'CAL',			'CARGA_EXCEL',		'',								'UPE',					'',						GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'UPE',			'CARGA_EXCEL',		'',								'UPE',					'',						GETDATE(),			1)
+
+-------------------------------------- DISEÑO -----------------------------------------------------------------
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'NOD',			'CARGA_DISEÑO',		'',								'',					'',						GETDATE(),			1)
+-----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'SIN',					'SIO',				'NOD',					GETDATE(),		1,					'Calcular'	)
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'',					'NOD',					GETDATE(),		1,					'Recalcular,CargaExcel,CargaDiseño,VisualizarExcel,Autorizar'	)
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'PRO',					'',					'PRD',					GETDATE(),		1,					'Recalcular,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'',					'DCP',					GETDATE(),		1,					'Recalcular,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'AUT',					'',					'NOD',					GETDATE(),		1,					'VisualizarExcel,Transmitir'	)
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'AUT',					'',					'PRD',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir'	)
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'AUT',					'',					'DCP',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir'	)
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'TRA',					'',					'NOD',					GETDATE(),		1,					'VisualizarExcel')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'TRA',					'',					'PRD',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'TRA',					'',					'DCP',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'ERT',					'',					'NOD',					GETDATE(),		1,					'VisualizarExcel,Transmitir')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'ERT',					'',					'PRD',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'ERT',					'',					'DCP',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir')
 
