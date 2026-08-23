@@ -58,7 +58,7 @@ CREATE TABLE PeriodosPublicacion(
 	FechaFinal						DATE,
 	DescripcionPeriodo				VARCHAR(400),
 	FechaCreacion					DATETIME,
-	UsuarioCreadorId				BIGINT,
+	UsuarioCreadorId				BIGINT
 
 )
 CREATE UNIQUE INDEX PK_PeriodosPublicacion ON PeriodosPublicacion (PeriodosId);
@@ -71,8 +71,7 @@ CREATE TABLE StatusAdminPublicacion(
 	UsuarioCreadorId					BIGINT,
 
 )
-
-CREATE UNIQUE INDEX PK_StatusAdminPublicacion ON StatusAdminPublicacion (StatusId);
+CREATE UNIQUE INDEX PK_StatusAdminPublicacion ON StatusAdminPublicacion (StatusId, AplicaA);
 
 CREATE TABLE AccionesAdminPublicacion(
 	StatusId							VARCHAR(3),
@@ -108,10 +107,12 @@ CREATE TABLE Publicacion (
 	TiposMediosid					BIGINT,
 	TituloPublicacion				VARCHAR(200),
 	DescripcionPublicacion			VARCHAR(400),
-	StatusCargaDiseño				VARCHAR(3),			-- NOD -- SIN DISEÑO, EVE --> HACE REFERENCIA A EventosDiseño, SEM --> Nuevo Diseño cargado despues al inicial
-	DiseñoObjetosFileId				BIGINT,				-- NULL SI CAMPO ANTERIOR ES EVE
-	StatusCargaExcel				VARCHAR(3),			-- CAL --> Ofertas de Publicacion correspondiente al Calculo, UPD --> ARCHIVO EXCEL CARGADO 
-	ExcelCargaObjetosFileId			BIGINT,
+	StatusDisenio					VARCHAR(3),			-- NOD -- SIN DISEÑO, EVE --> HACE REFERENCIA A EventosDiseño, SEM --> Nuevo Diseño cargado despues al inicial
+	DisenioObjetosFileId			BIGINT,				-- NULL SI CAMPO ANTERIOR ES EVE
+	StatusExcel						VARCHAR(3),			-- CAL --> Ofertas de Publicacion correspondiente al Calculo, UPD --> ARCHIVO EXCEL CARGADO 
+	ExcelCargadoObjetosFileId		BIGINT,
+	ExcelObjetosFileId				BIGINT,
+	PdfExcelObjetosFileId			BIGINT,
 	StatusPublicacion				VARCHAR(3),			-- PRO --> EN PROCESO / PROCESANDO, AUT --> AUTORIZADO, TRA --> TRANSMITIDO --
 	FechaCreacion					DATETIME,
 	UsuarioCreadorId				BIGINT,
@@ -120,7 +121,7 @@ CREATE TABLE Publicacion (
 )
 CREATE UNIQUE INDEX PK_Publicacion ON Publicacion (PublicacionId);
 
-CREATE TABLE PublicacionPromocionPublicada (
+CREATE TABLE PublicacionPromocionPublicada (			-- YA NO SE USA --
 	PublicacionId					BIGINT,
 	PromocionPublicadaId			BIGINT,
 	FechaCreacion					DATETIME,
@@ -142,7 +143,7 @@ CREATE TABLE PublicacionCrmPublicado (
 CREATE UNIQUE INDEX PK_PublicacionCrmPublicado ON PublicacionCrmPublicado (PublicacionId, CrmPublicadoId, ConsecutivoId );
 
 
-CREATE TABLE PublicacionMecanicas (
+CREATE TABLE PublicacionMecanicas (						-- YA NO SE USA --
 	PublicacionId					BIGINT,
 	MecanicasId						BIGINT,
 	EventosId						BIGINT,
@@ -157,6 +158,49 @@ CREATE TABLE PublicacionMecanicas (
 )
 CREATE UNIQUE INDEX PK_PublicacionMecanicas ON PublicacionMecanicas (PublicacionId, MecanicasId);
 
+-----------------------------------------------------------------------------------------------------------------------
+---------------------------  TABBLAS PARA LA CAPTURA DE LAS OFERTAS DE EMERGENTES  ------------------------------------
+-----------------------------------------------------------------------------------------------------------------------
+CREATE TABLE PromocionEmergente (				--- ANTES PromocionPublicada
+	PromocionEmergenteId			BIGINT,
+	FormatoCargaId					BIGINT,
+	EventosId						BIGINT,
+	NombreEvento					VARCHAR(300),
+	MediosId						INT,
+	TituloPromocion					VARCHAR(300),
+	FechaInicio						DATE,
+	FechaFinal						DATE,
+	StatusId						BIGINT,
+	ZonasId							BIGINT,
+	HastaAgotarProductos			CHAR(1),
+	DesgloseOfertas					CHAR(1),
+	DescripcionPromociones			VARCHAR(300),
+	Restricciones					VARCHAR(300),
+	RestriccionesDeptoMarca			VARCHAR(300),
+	CanalesVentaParticipantes		VARCHAR(300),
+	ObservacionHaciaMarketing		VARCHAR(300),
+	FechaCreacion					DATETIME,
+	UsuarioCreadorId				BIGINT,
+	FechaModificacion				DATETIME,
+	UsuarioModificacionId			BIGINT
+)
+CREATE UNIQUE INDEX PK_PromocionEmergente ON PromocionEmergente (PromocionEmergenteId);
+
+CREATE TABLE PromocionEmergenteMecanicas (			--- BORRAR TABLA  ---
+	PromocionEmergenteId			BIGINT,
+	MecanicasId						BIGINT,
+	EventosId						BIGINT,
+	FechaCreacion					DATETIME,
+	UsuarioCreadorId				BIGINT,
+	FechaModificacion				DATETIME,
+	UsuarioModificacionId			BIGINT
+)
+CREATE UNIQUE INDEX PK_PromocionEmergenteMecanicas ON PromocionEmergenteMecanicas (PromocionEmergenteId, MecanicasId);
+
+
+-----------------------------------------------------------------------------------------------------------------------
+---------------------------  TABBLAS PARA LA CAPTURA DE LAS OFERTAS DE DIRECCION  -------------------------------------
+-----------------------------------------------------------------------------------------------------------------------
 CREATE TABLE PromocionDireccion (				--- ANTES PromocionPublicada
 	PromocionDireccionId			BIGINT,
 	FormatoCargaId					BIGINT,
@@ -180,7 +224,7 @@ CREATE TABLE PromocionDireccion (				--- ANTES PromocionPublicada
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionPublicada ON PromocionPublicada (PromocionPublicadaId);
+CREATE UNIQUE INDEX PK_PromocionDireccion ON PromocionDireccion (PromocionDireccionId);
 
 CREATE TABLE PromocionDireccionSubCategorias (			-- ANTES PromocionPublicadaSubCategorias 
 	PromocionDireccionId			BIGINT,
@@ -191,7 +235,7 @@ CREATE TABLE PromocionDireccionSubCategorias (			-- ANTES PromocionPublicadaSubC
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionDireccionSubCategorias ON PromocionDireccionSubCategorias (PromocionPublicadaId, SubCategoriasId);
+CREATE UNIQUE INDEX PK_PromocionDireccionSubCategorias ON PromocionDireccionSubCategorias (PromocionDireccionId, SubCategoriasId);
 
 
 CREATE TABLE PromocionDireccionCategorias (				-- ANTES PromocionPublicadaCategorias
@@ -203,7 +247,7 @@ CREATE TABLE PromocionDireccionCategorias (				-- ANTES PromocionPublicadaCatego
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionDireccionCategorias ON PromocionDireccionCategorias (PromocionPublicadaId, CategoriasId);
+CREATE UNIQUE INDEX PK_PromocionDireccionCategorias ON PromocionDireccionCategorias (PromocionDireccionId, CategoriasId);
 
 CREATE TABLE PromocionDireccionProveedores (			--- ANTES PromocionPublicadaProveedores
 	PromocionDireccionId			BIGINT,
@@ -214,7 +258,7 @@ CREATE TABLE PromocionDireccionProveedores (			--- ANTES PromocionPublicadaProve
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionDireccionProveedores ON PromocionDireccionProveedores (PromocionPublicadaId, ProveedoresId);
+CREATE UNIQUE INDEX PK_PromocionDireccionProveedores ON PromocionDireccionProveedores (PromocionDireccionId, ProveedoresId);
 
 CREATE TABLE PromocionDireccionMarcas (			--- ANTES PromocionPublicadaMarcas
 	PromocionDireccionId			BIGINT,
@@ -225,7 +269,7 @@ CREATE TABLE PromocionDireccionMarcas (			--- ANTES PromocionPublicadaMarcas
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionDireccionMarcas ON PromocionDireccionMarcas (PromocionPublicadaId, MarcasId);
+CREATE UNIQUE INDEX PK_PromocionDireccionMarcas ON PromocionDireccionMarcas (PromocionDireccionId, MarcasId);
 
 CREATE TABLE PromocionDireccionGruposArticulos (			--- ANTES PromocionPublicadaGruposArticulos
 	PromocionDireccionId			BIGINT,
@@ -236,9 +280,9 @@ CREATE TABLE PromocionDireccionGruposArticulos (			--- ANTES PromocionPublicadaG
 	FechaModificacion				DATETIME,
 	UsuarioModificacionId			BIGINT
 )
-CREATE UNIQUE INDEX PK_PromocionDireccionGruposArticulos ON PromocionDireccionGruposArticulos (PromocionPublicadaId, GruposArticulosId);
+CREATE UNIQUE INDEX PK_PromocionDireccionGruposArticulos ON PromocionDireccionGruposArticulos (PromocionDireccionId, GruposArticulosId);
 
-
+-------------------------------------------------------------------------------------------------------------------
 CREATE TABLE PromocionPublicadaMecanicas (			--- BORRAR TABLA  ---
 	PromocionPublicadaId			BIGINT,
 	MecanicasId						BIGINT,
@@ -270,70 +314,155 @@ CREATE UNIQUE INDEX PK_CrmPublicado ON CrmPublicado (CrmPublicadoId);
 --------- DATOS PARA LAS PUBLCIACIONES ADCONTENT - ADSTORE ----------------------
 ---------------------------------------------------------------------------------
 CREATE TABLE PublicacionDatosBase	(
-		PublicacionId				BIGINT, 
-		PromocionDireccionId		BIGINT,					-- CAMBIO NOMBRE DE CAMPO ANTES PromocionPublicadaId --
-		EspacioPromocionalesId		BIGINT,
-		EventosId					BIGINT,
-		NombreEvento				VARCHAR(300)	NULL,		
-		MediosId					BIGINT,
-		NombreMedio					VARCHAR(300) 	NULL,
-		TodasTiendasZona			INT				NULL,
-		FechaInicioMedio			DATE			NULL,
-		FechaFinalMedio				DATE			NULL,
-		FechaInicioEvento			DATE			NULL,
-		FechaFinalEvento			DATE			NULL,	
-		Restricciones				VARCHAR(500) 	NULL, 
-		ObservacionesEvento 		VARCHAR(500) 	NULL,
-		ComentarioAsignacion 		VARCHAR(500)	NULL,
-		MecanicasId		 			INT 			NULL,
-		NombreMecanica				VARCHAR(300) 	NULL, 
-		FechaInicio					DATE			NULL,	
-		FechaFinal					DATE			NULL,
-		DepartamentosId				INT 			NULL,
-		NombreDepartamento 			VARCHAR(300) 	NULL,
-		CodigoEAN					VARCHAR(20) 	NULL,
-		ProductosId					VARCHAR(20) 	NULL,
-		NombreProducto				VARCHAR(400) 	NULL,
-		ProveedoresId				INT 			NULL,
-		NombreProveedores			VARCHAR(300) 	NULL,
-		GrupoProductosId			INT 			NULL,
-		NombreGrupoProductos 		VARCHAR(300) 	NULL,
-		MarcasId					INT 			NULL,
-		NombreMarcas				VARCHAR(300) 	NULL,
-		CategoriasId 				INT 			NULL,
-		NombreCategorias			VARCHAR(300) 	NULL, 
-		ZonasId						INT 			NULL,
-		NombreZonas					VARCHAR(300) 	NULL,
-		Modelo						VARCHAR(300) 	NULL,
-		DetalleTiendasParte1		VARCHAR(1000) 	NULL,
-		DetalleTiendasParte2		VARCHAR(1000) 	NULL,
-		DetalleTiendasParte3		VARCHAR(1000) 	NULL,
-		Mensualidades				INT 			NULL,
-		DesDirContado				INT 			NULL,
-		DesDirCredito				INT 			NULL,
-		DesCarContado				INT 			NULL,
-		DesCarCredito				INT 			NULL,
-		PrecioAnterior				INT 			NULL,
-		PrecioPromocion				INT 			NULL,
-		Observaciones				VARCHAR(1000) 	NULL,
-		PerteneceAFolleto			VARCHAR(1000) 	NULL,
-		Comentarios					VARCHAR(1000) 	NULL,
-		PrecioContado				INT 			NULL,
-		AbonitoRedondeado			INT 			NULL,
-		NumeroParcialidades 		INT 			NULL,
-		Caracteristica1				VARCHAR(1000) 	NULL,
-		Caracteristica2				VARCHAR(1000) 	NULL,
-		Caracteristica3				VARCHAR(1000) 	NULL,
-		Variable					VARCHAR(1000) 	NULL,
-		StatusIdEspacio				INT 			NULL,
-		NombreStatusEspacio			VARCHAR(200) 	NULL,
-		TipoMediosId				INT 			NULL,
-		NombreTipoMedios			VARCHAR(400) 	NULL,
-		ClaveFormato				VARCHAR(400) 	NULL,
-		DetallesId					INT 			NULL
+		PublicacionId						BIGINT, 
+		PromocionDireccionId				BIGINT			NULL,					-- CAMBIO NOMBRE DE CAMPO ANTES PromocionPublicadaId --
+		PromocionEmergenteId				BIGINT			NULL,
+		EspacioPromocionalesId				BIGINT			NULL,
+		EventosId							BIGINT			NULL,
+		NombreEvento						VARCHAR(300)	NULL,
+		MediosId							BIGINT			NULL,
+		NombreMedio							VARCHAR(300) 	NULL,
+		TodasTiendasZona					INT				NULL,
+		FechaInicioMedio					DATE			NULL,
+		FechaFinalMedio						DATE			NULL,
+		FechaInicioEvento					DATE			NULL,
+		FechaFinalEvento					DATE			NULL,	
+		ObservacionesEvento 				VARCHAR(500) 	NULL,
+		ComentarioAsignacion 				VARCHAR(500)	NULL,
+		MecanicasId		 					INT 			NULL,
+		NombreMecanica						VARCHAR(300) 	NULL, 
+		FechaInicio							DATE			NULL,	
+		FechaFinal							DATE			NULL,
+		DepartamentosId						INT 			NULL,
+		NombreDepartamento 					VARCHAR(300) 	NULL,
+		CodigoEAN							VARCHAR(20) 	NULL,
+		ProductosId							VARCHAR(20) 	NULL,
+		NombreProducto						VARCHAR(400) 	NULL,
+		ProveedoresId						INT 			NULL,
+		NombreProveedores					VARCHAR(300) 	NULL,
+		GrupoProductosId					INT 			NULL,
+		NombreGrupoProductos 				VARCHAR(300) 	NULL,
+		MarcasId							INT 			NULL,
+		NombreMarcas						VARCHAR(300) 	NULL,
+		CategoriasId 						INT 			NULL,
+		NombreCategorias					VARCHAR(300) 	NULL, 
+		ZonasId								INT 			NULL,
+		NombreZonas							VARCHAR(300) 	NULL,
+		Modelo								VARCHAR(300) 	NULL,
+		DetalleTiendasParte1				VARCHAR(1000) 	NULL,
+		DetalleTiendasParte2				VARCHAR(1000) 	NULL,
+		DetalleTiendasParte3				VARCHAR(1000) 	NULL,
+		Mensualidades						INT 			NULL,
+		DesDirContado						INT 			NULL,
+		DesDirCredito						INT 			NULL,
+		DesCarContado						INT 			NULL,
+		DesCarCredito						INT 			NULL,
+		PrecioAnterior						INT 			NULL,
+		PrecioPromocion						INT 			NULL,
+		PrecioPromocionContado				INT				NULL,
+		PrecioPromocionCredito				INT				NULL,
+		Observaciones						VARCHAR(1000) 	NULL,
+		PerteneceAFolleto					VARCHAR(1000) 	NULL,
+		Comentarios							VARCHAR(1000) 	NULL,
+		PrecioContado						INT 			NULL,
+		AbonitoRedondeado					INT 			NULL,
+		NumeroParcialidades 				INT 			NULL,
+		Caracteristica1						VARCHAR(1000) 	NULL,
+		Caracteristica2						VARCHAR(1000) 	NULL,
+		Caracteristica3						VARCHAR(1000) 	NULL,
+		Variable							VARCHAR(1000) 	NULL,
+		StatusIdEspacio						INT 			NULL,
+		NombreStatusEspacio					VARCHAR(200) 	NULL,
+		TipoMediosId						INT 			NULL,
+		NombreTipoMedios					VARCHAR(400) 	NULL,
+		ClaveFormato						VARCHAR(400) 	NULL,
+		DetallesId							INT 			NULL,
+		
+		TituloPromocion						VARCHAR(300)	NULL,
+		HastaAgotarProductos				CHAR(1)			NULL,
+		DescripcionPromociones				VARCHAR(300)	NULL,
+		Restricciones						VARCHAR(500)	NULL,
+		RestriccionesDeptoMarca				VARCHAR(300)	NULL,
+		CanalesVentaParticipantes			VARCHAR(300)	NULL
 	)
-CREATE 		 INDEX PK_PublicacionDatosBase 			ON PublicacionDatosBase (PublicacionId, PromocionPublicadaId, EspacioPromocionalesId, DetallesId );
+CREATE 		 INDEX PK_PublicacionDatosBase 			ON PublicacionDatosBase (PublicacionId, PromocionDireccionId, PromocionEmergenteId, EspacioPromocionalesId, DetallesId );
 CREATE  	  INDEX PK_PublicacionDatosBase_DetallesId 	ON PublicacionDatosBase (DetallesId );	
+
+CREATE TABLE PublicacionDatosBaseHistoria	(
+		PublicacionId						BIGINT, 
+		PromocionDireccionId				BIGINT			NULL,					-- CAMBIO NOMBRE DE CAMPO ANTES PromocionPublicadaId --
+		PromocionEmergenteId				BIGINT			NULL,
+		EspacioPromocionalesId				BIGINT			NULL,
+		EventosId							BIGINT			NULL,
+		NombreEvento						VARCHAR(300)	NULL,
+		MediosId							BIGINT			NULL,
+		NombreMedio							VARCHAR(300) 	NULL,
+		TodasTiendasZona					INT				NULL,
+		FechaInicioMedio					DATE			NULL,
+		FechaFinalMedio						DATE			NULL,
+		FechaInicioEvento					DATE			NULL,
+		FechaFinalEvento					DATE			NULL,	
+		ObservacionesEvento 				VARCHAR(500) 	NULL,
+		ComentarioAsignacion 				VARCHAR(500)	NULL,
+		MecanicasId		 					INT 			NULL,
+		NombreMecanica						VARCHAR(300) 	NULL, 
+		FechaInicio							DATE			NULL,	
+		FechaFinal							DATE			NULL,
+		DepartamentosId						INT 			NULL,
+		NombreDepartamento 					VARCHAR(300) 	NULL,
+		CodigoEAN							VARCHAR(20) 	NULL,
+		ProductosId							VARCHAR(20) 	NULL,
+		NombreProducto						VARCHAR(400) 	NULL,
+		ProveedoresId						INT 			NULL,
+		NombreProveedores					VARCHAR(300) 	NULL,
+		GrupoProductosId					INT 			NULL,
+		NombreGrupoProductos 				VARCHAR(300) 	NULL,
+		MarcasId							INT 			NULL,
+		NombreMarcas						VARCHAR(300) 	NULL,
+		CategoriasId 						INT 			NULL,
+		NombreCategorias					VARCHAR(300) 	NULL, 
+		ZonasId								INT 			NULL,
+		NombreZonas							VARCHAR(300) 	NULL,
+		Modelo								VARCHAR(300) 	NULL,
+		DetalleTiendasParte1				VARCHAR(1000) 	NULL,
+		DetalleTiendasParte2				VARCHAR(1000) 	NULL,
+		DetalleTiendasParte3				VARCHAR(1000) 	NULL,
+		Mensualidades						INT 			NULL,
+		DesDirContado						INT 			NULL,
+		DesDirCredito						INT 			NULL,
+		DesCarContado						INT 			NULL,
+		DesCarCredito						INT 			NULL,
+		PrecioAnterior						INT 			NULL,
+		PrecioPromocion						INT 			NULL,
+		PrecioPromocionContado				INT				NULL,
+		PrecioPromocionCredito				INT				NULL,
+		Observaciones						VARCHAR(1000) 	NULL,
+		PerteneceAFolleto					VARCHAR(1000) 	NULL,
+		Comentarios							VARCHAR(1000) 	NULL,
+		PrecioContado						INT 			NULL,
+		AbonitoRedondeado					INT 			NULL,
+		NumeroParcialidades 				INT 			NULL,
+		Caracteristica1						VARCHAR(1000) 	NULL,
+		Caracteristica2						VARCHAR(1000) 	NULL,
+		Caracteristica3						VARCHAR(1000) 	NULL,
+		Variable							VARCHAR(1000) 	NULL,
+		StatusIdEspacio						INT 			NULL,
+		NombreStatusEspacio					VARCHAR(200) 	NULL,
+		TipoMediosId						INT 			NULL,
+		NombreTipoMedios					VARCHAR(400) 	NULL,
+		ClaveFormato						VARCHAR(400) 	NULL,
+		DetallesId							INT 			NULL,
+		
+		TituloPromocion						VARCHAR(300)	NULL,
+		HastaAgotarProductos				CHAR(1)			NULL,
+		DescripcionPromociones				VARCHAR(300)	NULL,
+		Restricciones						VARCHAR(300)	NULL,
+		RestriccionesDeptoMarca				VARCHAR(300)	NULL,
+		CanalesVentaParticipantes			VARCHAR(300)	NULL
+	)
+CREATE 		 INDEX PK_PublicacionDatosBaseHistoria		ON PublicacionDatosBaseHistoria (PublicacionId, PromocionDireccionId, PromocionEmergenteId, EspacioPromocionalesId, DetallesId );
+CREATE  	  INDEX PK_PublicacionDatosBase_DetallesId 	ON PublicacionDatosBase (DetallesId );	
+
 	
 CREATE TABLE PublicacionEncuentasAdStore	(				--- YA NO SE USA --
 		PublicacionId					BIGINT,
@@ -410,33 +539,33 @@ CREATE UNIQUE INDEX PK_EncuentasAdContent ON EncuentasAdContent (PublicacionId, 
 
 CREATE TABLE ObjetosJson(
 	ObjetosJsonId			BIGINT,
-	ConsecutivoId			BIGINT,
-	ObjetoJsonStr			VARCHAR(2000),
-	CantidadCarPaquete		BIGINT,
-	CantidadCarEntregados	BIGINT,
+	-- ConsecutivoId			BIGINT,
+	ObjetoJsonStr			VARCHAR(MAX),
+	-- CantidadCarPaquete		BIGINT,				--- BORRAR CAMPO ---
+	-- CantidadCarEntregados	BIGINT,				--- BORRAR CAMPO ---
 	TotalCaracteres			BIGINT,
 	FechaCreacion			DATETIME,
 	UsuarioCreadorId		BIGINT
 )
-CREATE UNIQUE INDEX PK_ObjetosJson ON ObjetosJson (ObjetosJsonId, ConsecutivoId);
+CREATE UNIQUE INDEX PK_ObjetosJson ON ObjetosJson (ObjetosJsonId /*, ConsecutivoId*/);
 
 CREATE TABLE ObjetosFile(
 	ObjetosFileId			BIGINT,
-	OrigenArchivo			VARCHAR(10),		-- ORIGEN DE ARCHIVO, MEC --> EXCEL CARGA MECANICAS, 
-																	  APE --> Administracion Publicacion Excel, 
-																	  APD --> Administracion Publicacion Diseño
-	ConsecutivoId			BIGINT,				--- BORRAR CAMPO ---
+	OrigenArchivo			VARCHAR(50),		-- ORIGEN DE ARCHIVO, MEC --> EXCEL CARGA MECANICAS, 
+												--					  APE --> Administracion Publicacion Excel, 
+												--					  APD --> Administracion Publicacion Diseño
+	-- ConsecutivoId			BIGINT,				--- BORRAR CAMPO ---
 	NombreArchivo			VARCHAR(200),
 	Extension				VARCHAR(10),
-	FileBase64Str			VARCHAR(MAX)		--VARCHAR(2000),
-	CantidadCarPaquete		BIGINT,				--- BORRAR CAMPO ---
-	CantidadCarEntregados	BIGINT,				--- BORRAR CAMPO ---
+	FileBase64Str			VARCHAR(MAX),		--VARCHAR(2000),
+	-- CantidadCarPaquete		BIGINT,				--- BORRAR CAMPO ---
+	-- CantidadCarEntregados	BIGINT,				--- BORRAR CAMPO ---
 	TotalCaracteres			BIGINT,
 	LongitudArchivo			BIGINT,
 	FechaCreacion			DATETIME,
 	UsuarioCreadorId		BIGINT
 )
-CREATE UNIQUE INDEX PK_ObjetosFile ON ObjetosFile (ObjetosFileId, ConsecutivoId);
+CREATE UNIQUE INDEX PK_ObjetosFile ON ObjetosFile (ObjetosFileId /*, ConsecutivoId*/);
 
 
 CREATE TABLE MensajesSalientes(
@@ -532,10 +661,10 @@ CREATE UNIQUE INDEX PK_TiendasRutasAdStore ON TiendasRutasAdStore (TiendasId, Ru
 -----------------------------------------------------------------------------------
 ------------------------------   CARGA DE ARCHIVOS	   ----------------------------
 -----------------------------------------------------------------------------------
-CREATE TABLE EXCEL_PROMOCIONESDIRECCION(			--- YA NO SE USA EXCEL_PROMOCIONESPUBLICADAS --
+CREATE TABLE EXCEL_PROMOCIONESEMERGENTES(			--- YA NO SE USA EXCEL_PROMOCIONESPUBLICADAS --
 	TRANSACTIONID					BIGINT,
 	OfertaExcelId					BIGINT,
-	PromocionPublicadaId			BIGINT,
+	PromocionEmergenteId			BIGINT,
 	FormatoCargaId					BIGINT,
 	EventosId						BIGINT,
 	NombreEvento					VARCHAR(300),
@@ -555,14 +684,14 @@ CREATE TABLE EXCEL_PROMOCIONESDIRECCION(			--- YA NO SE USA EXCEL_PROMOCIONESPUB
 )
 ALTER TABLE EXCEL_PROMOCIONESDIRECCION ADD ObservacionHaciaMarketing		VARCHAR(300) NULL
 
-CREATE UNIQUE INDEX PK_EXCEL_PROMOCIONESDIRECCION ON EXCEL_PROMOCIONESDIRECCION (TRANSACTIONID, OfertaExcelId);
+CREATE UNIQUE INDEX PK_EXCEL_PROMOCIONESEMERGENTES ON EXCEL_PROMOCIONESEMERGENTES (TRANSACTIONID, OfertaExcelId);
 
-CREATE TABLE EXCEL_PROMOCIONESDIRECCION_MECANICAS(			--- YA NO SE USA ANTES EXCEL_PROMOCIONESPUBLICADAS_MECANICAS --
+CREATE TABLE EXCEL_PROMOCIONESEMERGENTES_MECANICAS(			--- YA NO SE USA ANTES EXCEL_PROMOCIONESPUBLICADAS_MECANICAS --
 	TRANSACTIONID					BIGINT,
 	OfertaExcelId					BIGINT,
 	OfertaExcelId_PreMecanicas		BIGINT
 )
-CREATE INDEX FK_EXCEL_PROMOCIONESDIRECCION_MECANICAS_MECANICAS ON EXCEL_PROMOCIONESDIRECCION_MECANICAS_MECANICAS (TRANSACTIONID, OfertaExcelId, OfertaExcelId_PreMecanicas);
+CREATE INDEX FK_EXCEL_PROMOCIONESEMERGENTES_MECANICAS ON EXCEL_PROMOCIONESEMERGENTES_MECANICAS (TRANSACTIONID, OfertaExcelId, OfertaExcelId_PreMecanicas);
 
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
@@ -773,11 +902,26 @@ udp_Direccion_PromocionPublicada_GruposArticulos_upd
 
 udp_Direccion_CrmPublicada_sel	
 
+udp_AdminPublicacion_AgregarPeriodosPublicacion_pro
+udp_AdminPublicacion_PeriodosPublicacion_sel
 udp_AdminPublicacion_Publicacion_sel
 udp_AdminPublicacion_Publicacion_ins
 udp_AdminPublicacion_Publicacion_udp
 udp_AdminPublicacion_Publicacion_act
+udp_AdminPublicacion_CalcularPublicacion_pro
+udp_AdminPublicacion_ReCalcularPublicacion_pro
+udp_AdminPublicacion_GuardarExcelAVisualizar_pro
+udp_AdminPublicacion_guardarDisenio_pro
+udp_AdminPublicacion_GuardarExcelCargado_pro
+udp_AdminPublicacion_ObjetoFile_Ins
+udp_AdminPublicacion_ObjetoFile_sel
+udp_AdminPublicacion_VisualizaObjetoFile_pro
+udp_AdminPublicacion_AutorizarPublicacion_pro
+udp_AdminPublicacion_TransmitirPublicacion_pro
+udp_AdminPublicacion_TransmitirFinalizado_pro
 
+udp_Reporte_DescargaPublicacionParaExcel_rep
+udp_Reporte_DetalleParaCargaManualExcel_rep
 
 udp_UsuariosCorreos_sel
 udp_BanderasProcesamientoPublicacion_sel
@@ -930,6 +1074,12 @@ INSERT INTO Parametros
 	VALUES( 87, 'HoraGeneracionPub', 'Hora Generacion de Publicacion', '17:00:00', 'CHAR', 1, 1, GETDATE(), NULL, 1, NULL )
 
 
+INSERT INTO FoliosTransacciones 
+	VALUES ( 'MovimientosPublicacion', 0 )
+	
+
+INSERT INTO FoliosTransacciones 
+	VALUES ( 'LogPublicacion', 0 )
 ------------------------------------------------------  
 -----  09 JUNIO -----------
  INSERT INTO STATUS
@@ -1201,57 +1351,66 @@ INSERT INTO LogProcesoPublicacion
 --------------------------------//////////////////////////////--------------------------------------
 --------------------------------//////////////////////////////--------------------------------------
 
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId )
-		VALUES	( 'SIN',		'SIN INICIAR',							'PUBLICACION',	GETDATE(),		1 )
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId )
+			VALUES	( 'SIN',		'SIN INICIAR',							'PUBLICACION',	GETDATE(),		1 )
 
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'PRO',		'EN PROCESO',							'PUBLICACION',	GETDATE(),		1 	)
-
-
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'AUT',		'AUTORIZADO PARA PUBLICAR',				'PUBLICACION',	GETDATE(),		1 	)
-	
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'PRT',		'TRANSMITIENDO',						'PUBLICACION',	GETDATE(),		1 	)
-
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'TRA',		'TRANSMITIDO CON EXITO',				'PUBLICACION',	GETDATE(),		1 	)
-
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'ERT',	'ERROR EN TRANSMISION',						'PUBLICACION',	GETDATE(),		1 	)
-
-	--------------------------------CARGA_EXCEL-----------------------------------------------
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'SIO',	'SIN INFORMACION DE OFERTAS',				'CARGA_EXCEL',	GETDATE(),		1 	)
-
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'CAL',	'INFORMACION CALCULADA',					'CARGA_EXCEL',	GETDATE(),		1 	)
-
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'UPE',	'INFORMACION CARGADA POR MARKETING',		'CARGA_EXCEL',	GETDATE(),		1 	)
-
-	---------------------------------CARGA_DISEÑO-------------------------------------------------------
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'NOD',	'SIN DISEÑO',								'CARGA_DISEÑO',	GETDATE(),		1 	)
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'PRO',		'EN PROCESO',							'PUBLICACION',	GETDATE(),		1 	)
 
 
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'PRD',	'DISEÑO RELACIONADO AL EVENTO',				'CARGA_DISEÑO',	GETDATE(),		1 	)
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'AUT',		'AUTORIZADO PARA PUBLICAR',				'PUBLICACION',	GETDATE(),		1 	)
+		
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'PRT',		'TRANSMITIENDO',						'PUBLICACION',	GETDATE(),		1 	)
 
-	INSERT INTO StatusAdminPublicacion
-				( StatusId,	DescripcionStatus,									AplicaA,		FechaCreacion,	UsuarioCreadorId  )
-		VALUES	( 'DCP',	'DISEÑO CARGADO SOLO PARA LA PUBLICACION SEMANAL',	'CARGA_DISEÑO',	GETDATE(),		1 	)
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,		DescripcionStatus,						AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'TRA',		'TRANSMITIDO CON EXITO',				'PUBLICACION',	GETDATE(),		1 	)
+
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'ERT',	'ERROR EN TRANSMISION',						'PUBLICACION',	GETDATE(),		1 	)
+
+		--------------------------------CARGA_EXCEL-----------------------------------------------
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'SIO',	'SIN INFORMACION DE OFERTAS',				'CARGA_EXCEL',	GETDATE(),		1 	)
+
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'CAL',	'INFORMACION CALCULADA',					'CARGA_EXCEL',	GETDATE(),		1 	)
+
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'UPE',	'INFORMACION CARGADA POR MARKETING',		'CARGA_EXCEL',	GETDATE(),		1 	)
+
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'ARM',	'ARCHIVO REVISADO POR MARKETING',			'CARGA_EXCEL',	GETDATE(),		1 	)
+
+		---------------------------------CARGA_DISEÑO-------------------------------------------------------
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'NOD',	'SIN DISEÑO',								'CARGA_DISENIO',	GETDATE(),		1 	)
+
+
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'PRD',	'DISEÑO RELACIONADO AL EVENTO',				'CARGA_DISENIO',	GETDATE(),		1 	)
+
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,									AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'DCP',	'DISEÑO CARGADO SOLO PARA LA PUBLICACION SEMANAL',	'CARGA_DISENIO',	GETDATE(),		1 	)
+
+		INSERT INTO StatusAdminPublicacion
+					( StatusId,	DescripcionStatus,							AplicaA,		FechaCreacion,	UsuarioCreadorId  )
+			VALUES	( 'ARM',	'ARCHIVO REVISADO POR MARKETING',			'CARGA_DISENIO',	GETDATE(),		1 	)
+
 
 -----------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -1264,14 +1423,27 @@ INSERT INTO AccionesAdminPublicacion
 INSERT INTO AccionesAdminPublicacion
 		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,			UsuarioCreadorId	)
 	VALUES( 'PRO',			'RE-CALCULAR',		'PRO',							'CAL',					'',						GETDATE(),			1)
+	
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'PRO',			'VISUALIZA_EXCEL',	'PRO',							'ARM',					'',						GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'PRO',			'VISUALIZA_DISENIO','PRO',							'',						'ARM',					GETDATE(),			1)
+	
 
 INSERT INTO AccionesAdminPublicacion
 		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
 	VALUES( 'PRO',			'AUTORIZAR',		'AUT',							'',						'',						GETDATE(),			1)
-
+	
 INSERT INTO AccionesAdminPublicacion
 		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
 	VALUES( 'PRO',			'TRANSMITIENDO',	'PRT',							'',						'',											GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'PRT',			'OK_TRANSMISION', 	'TRA',							'',						'',						GETDATE(),			1)
 
 INSERT INTO AccionesAdminPublicacion
 		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
@@ -1288,8 +1460,13 @@ INSERT INTO AccionesAdminPublicacion
 
 -------------------------------------- DISEÑO -----------------------------------------------------------------
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'NOD',			'CARGA_DISEÑO',		'',								'',					'',						GETDATE(),			1)
+		(   StatusId,		AccionId,						StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'NOD',			'CARGA_DISENIO_1ER_PERIODO',	'',								'',						'PRD',					GETDATE(),			1)
+	
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,						StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'NOD',			'CARGA_DISENIO_SIGUIENTES',		'',								'',						'DCP',					GETDATE(),			1)
+	
 -----------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -1299,15 +1476,24 @@ INSERT INTO IconosPorEstadosAdminPublicacion
 
 INSERT INTO IconosPorEstadosAdminPublicacion
 		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'PRO',					'',					'NOD',					GETDATE(),		1,					'Recalcular,CargaExcel,CargaDiseño,VisualizarExcel,Autorizar'	)
+	VALUES( 'PRO',					'',					'NOD',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,Autorizar'	)
 
 INSERT INTO IconosPorEstadosAdminPublicacion
 		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'PRO',					'',					'PRD',					GETDATE(),		1,					'Recalcular,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+	VALUES( 'PRO',					'',					'PRD',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
 		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'PRO',					'',					'DCP',					GETDATE(),		1,					'Recalcular,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+	VALUES( 'PRO',					'',					'DCP',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'',					'ARM',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'ARM',				'',						GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+
 
 INSERT INTO IconosPorEstadosAdminPublicacion
 		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
@@ -1344,4 +1530,5 @@ INSERT INTO IconosPorEstadosAdminPublicacion
 INSERT INTO IconosPorEstadosAdminPublicacion
 		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
 	VALUES( 'ERT',					'',					'DCP',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir')
+
 
