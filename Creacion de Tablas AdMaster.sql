@@ -44,8 +44,8 @@ CREATE UNIQUE INDEX PK_EventosDiseño ON EventosDiseño (EventosId);
 CREATE TABLE MovimientosPublicacion(
 	MovimientosId					BIGINT,
 	PublicacionId					BIGINT,
-	Accion							VARCHAR(3),		-- CAA --> Carga Archivo, DEA --> Descarga Archivo, VIA --> Visualizar archivo
-	Descripcion 					VARCHAR(200),
+	Accion							VARCHAR(20),		-- CAA --> Carga Archivo, DEA --> Descarga Archivo, VIA --> Visualizar archivo
+	Descripcion 					VARCHAR(2000),
 	ObjetosFileId					BIGINT,
 	FechaCreacion					DATETIME,
 	UsuarioCreadorId				BIGINT,
@@ -78,7 +78,7 @@ CREATE TABLE AccionesAdminPublicacion(
 	AccionId							VARCHAR(30),
 	StatusTransicionPublicacion			VARCHAR(3),
 	StatusTransicionExcel				VARCHAR(3),
-	StatusTransicionDiseño				VARCHAR(3),
+	StatusTransicionDisenio				VARCHAR(3),
 	FechaCreacion						DATETIME,
 	UsuarioCreadorId					BIGINT
 )
@@ -86,13 +86,13 @@ CREATE UNIQUE INDEX PK_AccionesAdminPublicacion ON AccionesAdminPublicacion (Sta
 
 CREATE TABLE IconosPorEstadosAdminPublicacion(
 	StatusPublicacionId					VARCHAR(3),
-	StatusCargaExcelId					VARCHAR(3),
-	StatusCargaDiseñoId					VARCHAR(3),
+	StatusExcelId						VARCHAR(3),
+	StatusDisenioId						VARCHAR(3),
 	IconosVisiblesFront					VARCHAR(400),
 	FechaCreacion						DATETIME,
 	UsuarioCreadorId					BIGINT
 )
-CREATE UNIQUE INDEX PK_IconosPorEstadosAdminPublicacion ON IconosPorEstadosAdminPublicacion (StatusPublicacionId, StatusCargaExcelId, StatusCargaDiseñoId);
+CREATE UNIQUE INDEX PK_IconosPorEstadosAdminPublicacion ON IconosPorEstadosAdminPublicacion (StatusPublicacionId, StatusExcelId, StatusDisenioId);
 
 -----------------------------------------------------------------------------------
 ------------------------------   TABLAS DE  PUBLICACION ---------------------------
@@ -927,6 +927,11 @@ udp_AdminPublicacion_ObjetoFile_sel
 udp_AdminPublicacion_VisualizaObjetoFile_pro
 udp_AdminPublicacion_AutorizarPublicacion_pro
 udp_AdminPublicacion_TransmitirPublicacion_pro
+udp_AdminPublicacion_MensajesSalientes_ObjetosJson_ups
+udp_AdminPublicacion_MensajesSalientesResultado_ins
+udp_Reporte_DetalleAdStore_rep
+
+
 udp_AdminPublicacion_TransmitirFinalizado_pro
 
 udp_AdminPublicacion_ProcesaExcel_Multiformato_ImportarOfertas_pro
@@ -1071,6 +1076,13 @@ INSERT INTO FoliosTransacciones
 
 INSERT INTO FoliosTransacciones 
 	VALUES ( 'LogPublicacion', 0 )
+	
+INSERT INTO FoliosTransacciones 
+	VALUES ( 'PeriodosPublicacion', 0 )
+	
+INSERT INTO FoliosTransacciones 
+	VALUES ( 'MovimientosPublicacion', 0 )	
+
 	
 INSERT INTO Parametros
 	VALUES( 84, 'DiaCorteEmergentes', 'Dia Corte Ofertas Emergentes', '6', 'CHAR', 1, 1, GETDATE(), NULL, 1, NULL )
@@ -1428,118 +1440,145 @@ INSERT INTO LogProcesoPublicacion
 -----------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------- PUBLICACION -----------------------------------------------------------------
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'SIN',			'CALCULAR',			'PRO',							'CAL',					'NOD',					GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'SIN',			'CALCULAR',			'PRO',							'CAL',					'NOD',						GETDATE(),			1)
 
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,			UsuarioCreadorId	)
-	VALUES( 'PRO',			'RE-CALCULAR',		'PRO',							'CAL',					'',						GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'PRO',			'RE-CALCULAR',		'PRO',							'CAL',					'',							GETDATE(),			1)	
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'PRO',			'AUTORIZAR',		'AUT',							'',						'',							GETDATE(),			1)
 	
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,			UsuarioCreadorId	)
-	VALUES( 'PRO',			'VISUALIZA_EXCEL',	'PRO',							'ARM',					'',						GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'PRO',			'TRANSMITIENDO',	'PRT',							'',						'',							GETDATE(),			1)
 
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,			UsuarioCreadorId	)
-	VALUES( 'PRO',			'VISUALIZA_DISENIO','PRO',							'',						'ARM',					GETDATE(),			1)
-	
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'AUT',			'OK_TRANSMISION', 	'TRA',							'',						'',							GETDATE(),			1)
 
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'PRO',			'AUTORIZAR',		'AUT',							'',						'',						GETDATE(),			1)
-	
-INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'PRO',			'TRANSMITIENDO',	'PRT',							'',						'',											GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'AUT',			'ERROR_TRANSMISION', 'ERT',							'',						'',							GETDATE(),			1)
 
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'PRT',			'OK_TRANSMISION', 	'TRA',							'',						'',						GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'ERT',			'ERROR_TRANSMISION', 'ERT',							'',						'',							GETDATE(),			1)
 
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'PRT',			'ERROR_TRANSMISION', 'ERT',							'',						'',						GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'ERT',			'OK_TRANSMISION', 	'TRA',							'',						'',							GETDATE(),			1)
 
 -------------------------------------- EXCEL -----------------------------------------------------------------
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'CAL',			'CARGA_EXCEL',		'',								'UPE',					'',						GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'CAL',			'CARGA_EXCEL',		'',								'UPE',					'',							GETDATE(),			1)
 
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'UPE',			'CARGA_EXCEL',		'',								'UPE',					'',						GETDATE(),			1)
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'UPE',			'CARGA_EXCEL',		'',								'UPE',					'',							GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'CAL',			'VISUALIZA_EXCEL',	'',								'ARM',					'',							GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'UPE',			'VISUALIZA_EXCEL',	'',								'ARM',					'',							GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'ARM',			'VISUALIZA_EXCEL',	'',								'ARM',					'',							GETDATE(),			1)
 
 -------------------------------------- DISEÑO -----------------------------------------------------------------
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,						StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'NOD',			'CARGA_DISENIO_1ER_PERIODO',	'',								'',						'PRD',					GETDATE(),			1)
+		(   StatusId,		AccionId,						StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'NOD',			'CARGA_DISENIO_1ER_PERIODO',	'',								'',						'PRD',						GETDATE(),			1)
 	
 INSERT INTO AccionesAdminPublicacion
-		(   StatusId,		AccionId,						StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDiseño,	FechaCreacion,		UsuarioCreadorId	)
-	VALUES( 'NOD',			'CARGA_DISENIO_SIGUIENTES',		'',								'',						'DCP',					GETDATE(),			1)
+		(   StatusId,		AccionId,						StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,		UsuarioCreadorId	)
+	VALUES( 'NOD',			'CARGA_DISENIO_SIGUIENTES',		'',								'',						'DCP',						GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'DCP',			'VISUALIZA_DISENIO','',								'',						'ARM',						GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'PRD',			'VISUALIZA_DISENIO','',								'',						'ARM',						GETDATE(),			1)
+
+INSERT INTO AccionesAdminPublicacion
+		(   StatusId,		AccionId,			StatusTransicionPublicacion,	StatusTransicionExcel,	StatusTransicionDisenio,	FechaCreacion,			UsuarioCreadorId	)
+	VALUES( 'ARM',			'VISUALIZA_DISENIO','',								'',						'ARM',						GETDATE(),			1)
 	
 -----------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'SIN',					'SIO',				'NOD',					GETDATE(),		1,					'Calcular'	)
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'SIN',					'SIO',			'NOD',				GETDATE(),		1,					',Calcular,'	)
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'PRO',					'',					'NOD',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,Autorizar'	)
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'',				'NOD',				GETDATE(),		1,					',Recalcular,DesCargaExcel,CargaExcel,CargaDisenio,VisualizarExcel,Autorizar,'	)
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'PRO',					'',					'PRD',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'PRO',					'',				'PRD',				GETDATE(),		1,					',Recalcular,DesCargaExcel,CargaExcel,CargaDisenio,VisualizarExcel,VisualizarDisenio,Autorizar,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'PRO',					'',					'DCP',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'',				'DCP',				GETDATE(),		1,					',Recalcular,DesCargaExcel,CargaExcel,CargaDisenio,VisualizarExcel,VisualizarDisenio,Autorizar,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'PRO',					'',					'ARM',					GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'ARM',			'NOD',				GETDATE(),		1,					',Recalcular,DesCargaExcel,CargaExcel,CargaDisenio,VisualizarExcel,Autorizar,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'PRO',					'ARM',				'',						GETDATE(),		1,					'Recalcular,DesCargaExcel,CargaExcel,CargaDiseño,VisualizarExcel,VisualizarDiseño,Autorizar')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'ARM',			'DCP',				GETDATE(),		1,					',Recalcular,DesCargaExcel,CargaExcel,CargaDisenio,VisualizarExcel,VisualizarDisenio,Autorizar,')
+
+INSERT INTO IconosPorEstadosAdminPublicacion
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'PRO',					'ARM',			'PRD',				GETDATE(),		1,					',Recalcular,DesCargaExcel,CargaExcel,CargaDisenio,VisualizarExcel,VisualizarDisenio,Autorizar,')
 
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'AUT',					'',					'NOD',					GETDATE(),		1,					'VisualizarExcel,Transmitir'	)
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'AUT',					'',				'NOD',				GETDATE(),		1,					',VisualizarExcel,Transmitir,'	)
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'AUT',					'',					'PRD',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir'	)
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'AUT',					'',				'PRD',				GETDATE(),		1,					',VisualizarExcel,VisualizarDisenio,Transmitir,'	)
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
-	VALUES( 'AUT',					'',					'DCP',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir'	)
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)
+	VALUES( 'AUT',					'',				'DCP',				GETDATE(),		1,					',VisualizarExcel,VisualizarDisenio,Transmitir,'	)
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'TRA',					'',					'NOD',					GETDATE(),		1,					'VisualizarExcel')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'TRA',					'',				'NOD',				GETDATE(),		1,					',VisualizarExcel,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'TRA',					'',					'PRD',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'TRA',					'',				'PRD',				GETDATE(),		1,					',VisualizarExcel,VisualizarDisenio,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'TRA',					'',					'DCP',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'TRA',					'',				'DCP',				GETDATE(),		1,					',VisualizarExcel,VisualizarDisenio,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'ERT',					'',					'NOD',					GETDATE(),		1,					'VisualizarExcel,Transmitir')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'ERT',					'',				'NOD',				GETDATE(),		1,					',VisualizarExcel,Transmitir,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'ERT',					'',					'PRD',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'ERT',					'',				'PRD',				GETDATE(),		1,					',VisualizarExcel,VisualizarDisenio,Transmitir,')
 
 INSERT INTO IconosPorEstadosAdminPublicacion
-		(	StatusPublicacionId,	StatusCargaExcelId,	StatusCargaDiseñoId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
-	VALUES( 'ERT',					'',					'DCP',					GETDATE(),		1,					'VisualizarExcel,VisualizarDiseño,Transmitir')
+		(	StatusPublicacionId,	StatusExcelId,	StatusDisenioId,	FechaCreacion,	UsuarioCreadorId,	IconosVisiblesFront				)													
+	VALUES( 'ERT',					'',				'DCP',				GETDATE(),		1,					',VisualizarExcel,VisualizarDisenio,Transmitir,')
 
 
